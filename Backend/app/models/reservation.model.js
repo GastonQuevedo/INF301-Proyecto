@@ -1,6 +1,14 @@
 const mongoose = require('mongoose')
 
 const reservationSchema = new mongoose.Schema({
+    patient: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
+    medic: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
     wasAttended: {
         type: Boolean,
         default: false,
