@@ -10,6 +10,9 @@ const dotenvExpand = require('dotenv-expand')
 const path = require('node:path')
 const Role = require('./app/models/role.model')
 const User = require('./app/models/user.model')
+const userRoutes = require('./app/routes/user.routes')
+const reservationRoutes = require('./app/routes/reservation.routes')
+const authRoutes = require('./app/routes/auth.routes')
 var bcrypt = require("bcryptjs")
 
 // Load environment variables if needed
@@ -82,7 +85,11 @@ fastify.get("/", async function (req, reply) {
     } else
         reply.send({ message: `Welcome to the backend.` })
 })
+
 // Routes
+fastify.register(userRoutes, { prefix: '/api/users' })
+fastify.register(reservationRoutes, { prefix: '/api/reservations' })
+fastify.register(authRoutes, { prefix: '/api/auth' })
 
 // Set host and port, listen for requests
 fastify.listen({host: process.env.HOST, port: process.env.PORT}, (err) => {

@@ -4,6 +4,7 @@ const reservationSchema = new mongoose.Schema({
     patient: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
+        default: null
     },
     medic: {
         type: mongoose.Schema.Types.ObjectId,
@@ -27,7 +28,7 @@ const reservationSchema = new mongoose.Schema({
     },
     value: {
         type: Number,
-        required: true,
+        required: false,
     }
 })
 
