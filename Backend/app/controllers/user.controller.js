@@ -1,6 +1,7 @@
 const User = require('../models/user.model')
 const Role = require('../models/role.model')
 var bcrypt = require("bcryptjs")
+const mongoose = require('mongoose')
 
 // Get a list of users sorted by their name
 async function getUsers(request, reply) {

@@ -424,6 +424,66 @@ async function cancelReservationState(request, reply) {
     }
 }
 
+// Get a list of reservations from a medic sorted by their date (createdAt) that belongs to today
+async function getReservationsMedic(request, reply) {
+    try {
+        currentUser = await User.findById(request.manualUser.id).populate('roles', '-__v')
+        if (currentUser.roles.some(obj => obj.name === "medic")) {
+            const startDateTime = new Date()
+            const endDateTime = new Date()
+            startDateTime.setHours(0, 0, 0, 0)
+            endDateTime.setHours(23, 59, 59, 999)
+            const query = {
+                medic: currentUser,
+                createdAt: {
+                    $gte: startDateTime,
+                    $lt: endDateTime
+                }
+            }
+            const reservations = await Reservation.find(query).sort({createdAt: 1}).populate('patient')
+            if (reservations.length === 0) {
+                reply.status(200).send({ message: "No reservations found." })
+                return
+            }
+            reply.status(200).send(reservations)
+        } else {
+            reply.status(403).send({ message: "You do not have permission to access this resource." })
+        }
+    } catch (error) {
+        reply.status(500).send(error)
+    }
+}
+
+// Change the state of the flag 'wasAttended' from a specific reservation (the patient was attended)
+async function updateReservationToAttended(request, reply) {
+    try {
+        currentUser = await User.findById(request.manualUser.id).populate('roles', '-__v')
+        if (currentUser.roles.some(obj => obj.name === "medic")) {
+            const reservationId = request.params.id
+            if (!mongoose.Types.ObjectId.isValid(reservationId)) {
+                reply.status(400).send({ message: 'Invalid reservation ID format' })
+            }
+            const reservation = await Reservation.findById(reservationId)
+            if (!reservation) {
+                reply.status(404).send({ message: "Reservation not found." })
+                return
+            }
+            if (!reservation.wasAttended) {
+                await Reservation.findByIdAndUpdate(reservationId, {wasAttended: true})
+                const reservationToUpdate = await Reservation.findById(reservationId)
+                const message = { message: "Reservation updated succesfully. The patient was attended." }
+                reply.status(200).send({ ...reservationToUpdate._doc, ...message })
+            } else {
+                reply.status(400).send({ message: "The patient was already attended." })
+            }
+        } else {
+            reply.status(403).send({ message: "You do not have permission to access this resource." })
+        }
+    } catch (error) {
+        reply.status(500).send(error)
+    }
+}
+
 module.exports = {
     getReservations,
     getReservationsToday,
@@ -434,5 +494,7 @@ module.exports = {
     searchMedicsName,
     getReservationsPatient,
     updateReservationState,
-    cancelReservationState
+    cancelReservationState,
+    getReservationsMedic,
+    updateReservationToAttended
 }

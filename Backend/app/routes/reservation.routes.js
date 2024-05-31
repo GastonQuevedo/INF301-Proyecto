@@ -9,11 +9,13 @@ async function reservationRoutes(fastify, options, done) {
     fastify.get('/range/:id', reservationController.getReservationsRange)
     fastify.post('/:id', reservationController.createReservationMedic)
     fastify.delete('/:id', reservationController.deleteReservation)
-    fastify.get('/medicspeciality/', reservationController.searchMedicsSpeciality)
-    fastify.get('/medicname/', reservationController.searchMedicsName)
+    fastify.get('/medicspeciality', reservationController.searchMedicsSpeciality)
+    fastify.get('/medicname', reservationController.searchMedicsName)
     fastify.get('/patient/:id', reservationController.getReservationsPatient)
     fastify.put('/:id', reservationController.updateReservationState)
     fastify.put('/cancel/:id', reservationController.cancelReservationState)
+    fastify.get('/medic', reservationController.getReservationsMedic)
+    fastify.put('/attend/:id', reservationController.updateReservationToAttended)
 
     done()
 }
