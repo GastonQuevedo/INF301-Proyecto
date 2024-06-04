@@ -394,6 +394,36 @@ async function updateReservationState(request, reply) {
     }
 }
 
+// Change the state of the flag 'isPaid' from a specific reservation.
+async function updatePaidState(request, reply) {
+    try {
+        currentUser = await User.findById(request.manualUser.id).populate('roles', '-__v')
+        if (currentUser.roles.some(obj => obj.name === "secretary")) {
+            const reservationId = request.params.id
+            if (!mongoose.Types.ObjectId.isValid(reservationId)) {
+                reply.status(400).send({ message: 'Invalid reservation ID format' })
+            }
+            const reservation = await Reservation.findById(reservationId)
+            if (!reservation) {
+                reply.status(404).send({ message: "Reservation not found." })
+                return
+            }
+            if (!reservation.isPaid) {
+                await Reservation.findByIdAndUpdate(reservationId, {isPaid: true})
+                const reservationToUpdate = await Reservation.findById(reservationId)
+                const message = { message: "Reservation updated succesfully. The reservation is now paid." }
+                reply.status(200).send({ ...reservationToUpdate._doc, ...message })
+            } else {
+                reply.status(400).send({ message: "The reservation is already paid." })
+            }
+        } else {
+            reply.status(403).send({ message: "You do not have permission to access this resource." })
+        }
+    } catch (error) {
+        reply.status(500).send(error)
+    }
+}
+
 // Change the state of the flag 'isUnoccupied' from a specific reservation (cancel medical appointment)
 async function cancelReservationState(request, reply) {
     try {
