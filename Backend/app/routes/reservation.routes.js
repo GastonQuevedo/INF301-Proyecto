@@ -13,6 +13,7 @@ async function reservationRoutes(fastify, options) {
     fastify.get('/medicname', reservationController.searchMedicsName)
     fastify.get('/patient/:id', reservationController.getReservationsPatient)
     fastify.put('/:id', reservationController.updateReservationState)
+    fastify.put('/paid/:id', reservationController.updatePaidState)
     fastify.put('/cancel/:id', reservationController.cancelReservationState)
     fastify.get('/medic', reservationController.getReservationsMedic)
     fastify.put('/attend/:id', reservationController.updateReservationToAttended)
