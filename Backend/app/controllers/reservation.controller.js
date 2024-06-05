@@ -514,6 +514,40 @@ async function updateReservationToAttended(request, reply) {
     }
 }
 
+// Función para obtener el valor de recaudación de un médico específico.
+async function sumValuesForMedic(request, reply) {
+    try {
+        const currentUser = await User.findById(request.manualUser.id).populate('roles', '-__v')
+        if (currentUser.roles.some(obj => obj.name === "secretary")) {
+            const medicId = request.params.id
+            if (!mongoose.Types.ObjectId.isValid(medicId)) {
+                reply.status(400).send({ message: 'Invalid medic ID format'});
+                return;
+            }
+        
+
+            const medic = await User.findById(medicId);
+            if (!medic) {
+                reply.status(400).send({ message: "Medic does not exists."});
+                return;
+            }
+
+            const result = await Reservation.aggregate([
+                { $match: {medic: mongoose.Types.ObjectId(medicId), isPaid: true } },
+                { $group: {_id: null, totalValue: { $sum: "$value" } } }
+            ]);
+
+            const totalValue = result.length > 0 ? result[0].totalValue : 0;
+
+            reply.status(200).send({ totalValue });
+        } else {
+            reply.status(403).send({ message: "You do not have permission to access this resource." });
+        }
+    } catch (error) {
+        reply.status(500).send(error);
+    }
+}
+
 module.exports = {
     getReservations,
     getReservationsToday,
@@ -527,5 +561,6 @@ module.exports = {
     updatePaidState,
     cancelReservationState,
     getReservationsMedic,
-    updateReservationToAttended
+    updateReservationToAttended,
+    sumValuesForMedic
 }
