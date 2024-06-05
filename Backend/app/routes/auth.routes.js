@@ -3,7 +3,7 @@ const User = require("../models/user.model")
 const RefreshToken = require("../models/refreshToken.model")
 var bcrypt = require("bcryptjs")
 
-async function authRoutes(fastify, options, done) {
+async function authRoutes(fastify, options) {
     fastify.post("/signin", async (request, reply) => {
         try {
             const userEmail = request.body.email

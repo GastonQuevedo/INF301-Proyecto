@@ -1,5 +1,6 @@
 const User = require('../models/user.model')
 const Role = require('../models/role.model')
+const Image = require('../models/image.model').image
 var bcrypt = require("bcryptjs")
 const mongoose = require('mongoose')
 
@@ -60,20 +61,46 @@ async function createUserMedic(request, reply) {
                 reply.status(400).send({ message: "Email already exists." })
                 return
             }
-            const user = new User({
-                name,
-                email,
-                password: bcrypt.hashSync(password, 8),
-                rut,
-                speciality,
-                insurance,
-                center
-            })
-            const role = await Role.findOne({ name: "medic" })
-            user.roles = [role]
-            await user.save()
-            const message = { message: "User (medic) saved successfully."}
-            reply.status(200).send({ ...user._doc, ...message })
+            const file = request.file
+            if(file) {
+                const image = new Image({
+                    filename: request.file.filename,
+                    originalname: request.file.originalname,
+                    path: request.file.path,
+                    uploadedAt: new Date()
+                })
+                await image.save()
+                const user = new User({
+                    name,
+                    email,
+                    password: bcrypt.hashSync(password, 8),
+                    rut,
+                    speciality,
+                    insurance,
+                    center,
+                    image: image
+                })
+                const role = await Role.findOne({ name: "medic" })
+                user.roles = [role]
+                await user.save()
+                const message = { message: "User (medic) and image saved successfully."}
+                reply.status(200).send({ ...user._doc, ...message })
+            } else {
+                const user = new User({
+                    name,
+                    email,
+                    password: bcrypt.hashSync(password, 8),
+                    rut,
+                    speciality,
+                    insurance,
+                    center
+                })
+                const role = await Role.findOne({ name: "medic" })
+                user.roles = [role]
+                await user.save()
+                const message = { message: "User (medic) saved successfully."}
+                reply.status(200).send({ ...user._doc, ...message })
+            }
         } else {
             reply.status(403).send({ message: "You do not have permission to access this resource." })
         }

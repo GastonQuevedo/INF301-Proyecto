@@ -1,7 +1,7 @@
 const reservationController = require('../controllers/reservation.controller')
 const authenticate = require('../middleware/authenticate')
 
-async function reservationRoutes(fastify, options, done) {
+async function reservationRoutes(fastify, options) {
     fastify.addHook("onRequest", authenticate)
 
     fastify.get('/:id', reservationController.getReservations)
@@ -17,7 +17,6 @@ async function reservationRoutes(fastify, options, done) {
     fastify.get('/medic', reservationController.getReservationsMedic)
     fastify.put('/attend/:id', reservationController.updateReservationToAttended)
 
-    done()
 }
 
 module.exports = reservationRoutes
