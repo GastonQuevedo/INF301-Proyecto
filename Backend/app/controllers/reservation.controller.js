@@ -524,6 +524,7 @@ module.exports = {
     searchMedicsName,
     getReservationsPatient,
     updateReservationState,
+    updatePaidState,
     cancelReservationState,
     getReservationsMedic,
     updateReservationToAttended
